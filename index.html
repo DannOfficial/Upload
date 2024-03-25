@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Uploader - DannTeam</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+</head>
+
+<body class="bg-gray-100">
+    <div class="container mx-auto px-6 py-4">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-12 lg:grid-cols-3">
+            <h1 class="text-3xl font-bold mb-6">File Uploader</h1>
+            <form id="form" enctype="multipart/form-data">
+                <div class="col-span-1">
+                    <div class="flex items-center border rounded-md px-4 py-2 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-200">
+                        <i class="fa-solid fa-upload mr-4 text-gray-400"></i>
+                        <label class="text-sm text-gray-700" for="file">Pilih File</label>
+                        <input type="file" id="file" name="file" class="hidden" />
+                    </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button type="submit" class="px-4 py-1 text-base font-semibold text-white bg-blue-600 rounded-md border-blue-600 hover:bg-blue-700 focus:outline-none focus:border focus:border-blue-700 focus:ring focus:ring-blue-200">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer flex justify-center items-center py-4 bg-gray-100 text-gray-600">
+        <div>&copy; 2024 <a href="https://dannteam.com" target="_blank" class="text-blue-600">DannTeam</a>. All Rights Reserved.</div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const submitButton = document.querySelector('button[type="submit"]');
+            const loading = document.createElement('i');
+            loading.classList.add('fa-solid', 'fa-spin', 'fa-spinner');
+
+            submitButton.disabled = true;
+            submitButton.appendChild(loading);
+            submitButton.classList.remove('border-blue-600', 'hover:bg-blue-700');
+            submitButton.classList.add('border-gray-500', 'hover:bg-gray-600');
+
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    submitButton.disabled = false;
+                    loading.remove();
+                    submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
+                    submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Upload Berhasil!',
+                            text: `File ${data.name} berhasil diupload!`,
+                            footer: `<a href="${data.url}" target="_blank">Click here to view</a>`
+                        }).then(() => {
+                            document.querySelector('input[type="file"]').value = '';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Upload Failed',
+                            text: data.error
+                        });
+                    }
+                })
+                .catch((error) => {
+                    submitButton.disabled = false;
+                    loading.remove();
+                    submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
+                    submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload Failed',
+                        text: error.message
+                    });
+                });
+        });
+    </script>
+</body>
+
+</html>
