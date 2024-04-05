@@ -1,95 +1,261 @@
 <!DOCTYPE html>
-<html lang="en">
+  <html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>File Uploader - DannTeam</title>
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-    <script src="https://unpkg.com/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-</head>
+  <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>File Uploader - DannTeam</title>
+      <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+      <script src="https://unpkg.com/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+      <style>
+          .sidebar {
+              width: 200px;
+              height: 100%;
+              position: fixed;
+              top: 0;
+              left: -200px;
+              background-color: #fff;
+              transition: all 0.3s ease;
+              z-index: 1000;
+          }
 
-<body class="bg-gray-100">
-    <div class="container mx-auto px-6 py-4">
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-12 lg:grid-cols-3">
-            <h1 class="text-3xl font-bold mb-6">File Uploader</h1>
-            <form id="form" enctype="multipart/form-data">
-                <div class="col-span-1">
-                    <div class="flex items-center border rounded-md px-4 py-2 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-200">
-                        <i class="fa-solid fa-upload mr-4 text-gray-400"></i>
-                        <label class="text-sm text-gray-700" for="file">Pilih File</label>
-                        <input type="file" id="file" name="file" class="hidden" />
-                    </div>
-                </div>
-                <div class="mt-4 flex justify-end">
-                    <button type="submit" class="px-4 py-1 text-base font-semibold text-white bg-blue-600 rounded-md border-blue-600 hover:bg-blue-700 focus:outline-none focus:border focus:border-blue-700 focus:ring focus:ring-blue-200">Upload</button>
-                </div>
-            </form>
-        </div>
-    </div>
+          .sidebar.active {
+              left: 0;
+          }
 
-    <div class="footer flex justify-center items-center py-4 bg-gray-100 text-gray-600">
-        <div>&copy; 2024 <a href="https://dannteam.com" target="_blank" class="text-blue-600">DannTeam</a>. All Rights Reserved.</div>
-    </div>
+          .sidebar .nav-links {
+              margin-top: 50px;
+          }
 
-    <script>
-        const form = document.getElementById('form');
+          .sidebar .nav-links li {
+              text-align: center;
+          }
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
+          .sidebar .nav-links li a {
+              display: block;
+              padding: 20px;
+              color: #000;
+              text-decoration: none;
+          }
 
-            const formData = new FormData(form);
-            const submitButton = document.querySelector('button[type="submit"]');
-            const loading = document.createElement('i');
-            loading.classList.add('fa-solid', 'fa-spin', 'fa-spinner');
+          .sidebar .nav-links li a:hover {
+              background-color: #f0f0f0;
+          }
 
-            submitButton.disabled = true;
-            submitButton.appendChild(loading);
-            submitButton.classList.remove('border-blue-600', 'hover:bg-blue-700');
-            submitButton.classList.add('border-gray-500', 'hover:bg-gray-600');
+          .overlay {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.5);
+              z-index: 999;
+              display: none;
+          }
 
-            fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    submitButton.disabled = false;
-                    loading.remove();
-                    submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
-                    submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
+          .overlay.active {
+              display: block;
+          }
 
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Upload Berhasil!',
-                            text: `File ${data.name} berhasil diupload!`,
-                            footer: `<a href="${data.url}" target="_blank">Click here to view</a>`
-                        }).then(() => {
-                            document.querySelector('input[type="file"]').value = '';
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Upload Failed',
-                            text: data.error
-                        });
-                    }
-                })
-                .catch((error) => {
-                    submitButton.disabled = false;
-                    loading.remove();
-                    submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
-                    submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Upload Failed',
-                        text: error.message
-                    });
-                });
-        });
-    </script>
-</body>
+          .toggle-btn {
+              position: absolute;
+              top: 15px;
+              right: 20px;
+              cursor: pointer;
+              z-index: 1001;
+          }
 
-</html>
+          .social-media-icons {
+              position: absolute;
+              bottom: 10px;
+              left: 50%;
+              transform: translateX(-50%);
+          }
+
+          .social-media-icons a {
+              margin: 0 5px;
+              font-size: 20px;
+              color: #000;
+          }
+
+          .image-container {
+              position: relative;
+              width: 100px;
+              height: 100px;
+              overflow: hidden;
+              border-radius: 10px;
+          }
+
+          .image-container img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+          }
+
+          .image-overlay {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.5);
+              opacity: 0;
+              transition: opacity 0.3s ease;
+              border-radius: 10px;
+          }
+
+          .image-container:hover .image-overlay {
+              opacity: 1;
+          }
+
+          .image-overlay-content {
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              color: #fff;
+              text-align: center;
+          }
+      </style>
+  </head>
+
+  <body class="bg-gray-100">
+      <!-- Navbar -->
+      <nav class="bg-white shadow-lg">
+          <div class="container mx-auto px-6 py-3 flex justify-between items-center relative">
+              <div class="text-xl font-semibold text-gray-800">DannTeam</div>
+              <button class="toggle-btn">
+                  <i class="fas fa-bars"></i>
+              </button>
+          </div>
+      </nav>
+      <!-- End Navbar -->
+
+      <!-- Sidebar -->
+      <div class="sidebar">
+          <ul class="nav-links">
+              <li><a href="#" class="text-gray-800 hover:text-blue-600">Home</a></li>
+              <li><a href="#" class="text-gray-800 hover:text-blue-600">About</a></li>
+              <li><a href="#" class="text-gray-800 hover:text-blue-600">Contact</a></li>
+              <div class="social-media-icons">
+                  <a href="https://www.facebook.com/dannteam.id" target="_blank"><i class="fab fa-facebook"></i></a>
+                  <a href="https://www.twitter.com/dannofficial" target="_blank"><i class="fab fa-twitter"></i></a>
+                  <a href="https://www.instagram.com/dannalwaysalone" target="_blank"><i class="fab fa-instagram"></i></a>
+              </div>
+          </ul>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="overlay"></div>
+
+      <div class="container mx-auto px-6 py-4">
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-12 lg:grid-cols-3">
+              <h1 class="text-3xl font-bold mb-6">File Uploader</h1>
+              <form id="form" enctype="multipart/form-data">
+                  <div class="col-span-1">
+                      <div class="flex items-center border rounded-md px-4 py-2 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-200">
+                          <i class="fa-solid fa-upload mr-4 text-gray-400"></i>
+                          <label class="text-sm text-gray-700" for="file">Pilih File</label>
+                          <input type="file" id="file" name="file" class="hidden" />
+                      </div>
+                  </div>
+                  <div class="mt-4 flex justify-end">
+                      <button type="submit" class="px-4 py-1 text-base font-semibold text-white bg-blue-600 rounded-md border-blue-600 hover:bg-blue-700 focus:outline-none focus:border focus:border-blue-700 focus:ring focus:ring-blue-200">Upload</button>
+                  </div>
+              </form>
+          </div>
+
+          <!-- Image and Link -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div class="image-container">
+                  <a href="/posting/ahah" target="_blank">
+                      <img src="https://pps.whatsapp.net/v/t61.24694-24/427276266_814850690689386_6590180705939941700_n.jpg?ccb=11-4&oh=01_ASAjudNls9Nn22VwQ0ROOaZyCqPym_4rTvSnRz4DvUT3WQ&oe=661CF1F7&_nc_sid=e6ed6c&_nc_cat=100" />
+                      <div class="image-overlay">
+                          <div class="image-overlay-content">
+                              <span>View</span>
+                          </div>
+                      </div>
+                  </a>
+              </div>
+          </div>
+          <!-- End Image and Link -->
+      </div>
+
+      <div class="footer flex justify-center items-center py-4 bg-gray-100 text-gray-600">
+          <div>&copy; 2024 <a href="https://dannteam.com" target="_blank" class="text-blue-600">DannTeam</a>. All Rights Reserved.</div>
+      </div>
+
+      <script>
+          const form = document.getElementById('form');
+          const toggleBtn = document.querySelector('.toggle-btn');
+          const sidebar = document.querySelector('.sidebar');
+          const overlay = document.querySelector('.overlay');
+
+          toggleBtn.addEventListener('click', () => {
+              sidebar.classList.toggle('active');
+              overlay.classList.toggle('active');
+          });
+
+          overlay.addEventListener('click', () => {
+              sidebar.classList.remove('active');
+              overlay.classList.remove('active');
+          });
+
+          form.addEventListener('submit', (e) => {
+              e.preventDefault();
+
+              const formData = new FormData(form);
+              const submitButton = document.querySelector('button[type="submit"]');
+              const loading = document.createElement('i');
+              loading.classList.add('fa-solid', 'fa-spin', 'fa-spinner');
+
+              submitButton.disabled = true;
+              submitButton.appendChild(loading);
+              submitButton.classList.remove('border-blue-600', 'hover:bg-blue-700');
+              submitButton.classList.add('border-gray-500', 'hover:bg-gray-600');
+
+              fetch('/api/upload', {
+                      method: 'POST',
+                      body: formData
+                  })
+                  .then((res) => res.json())
+                  .then((data) => {
+                      submitButton.disabled = false;
+                      loading.remove();
+                      submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
+                      submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
+
+                      if (data.success) {
+                          Swal.fire({
+                              icon: 'success',
+                              title: 'Upload Berhasil!',
+                              text: `File berhasil diupload!`,
+                              footer: `<a href="${data.url}" target="_blank">Click here to view</a>`
+                          }).then(() => {
+                              document.querySelector('input[type="file"]').value = '';
+                          });
+                      } else {
+                          Swal.fire({
+                              icon: 'error',
+                              title: 'Upload Failed!',
+                              text: data.error
+                          });
+                      }
+                  })
+                  .catch((error) => {
+                      submitButton.disabled = false;
+                      loading.remove();
+                      submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
+                      submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
+                      Swal.fire({
+                          icon: 'error',
+                          title: 'Upload Failed!',
+                          text: error.message
+                      });
+                  });
+          });
+      </script>
+  </body>
+
+  </html>
