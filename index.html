@@ -1,261 +1,448 @@
 <!DOCTYPE html>
-  <html lang="en">
+<html lang="en">
 
-  <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>File Uploader - DannTeam</title>
-      <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
-      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
-      <script src="https://unpkg.com/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-      <style>
-          .sidebar {
-              width: 200px;
-              height: 100%;
-              position: fixed;
-              top: 0;
-              left: -200px;
-              background-color: #fff;
-              transition: all 0.3s ease;
-              z-index: 1000;
-          }
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Uploader - DannTeam</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <script src="https://unpkg.com/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <style>
+        .sidebar {
+            width: 200px;
+            height: 100%;
+            position: fixed;
+            top: 0;
+            left: -200px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
 
-          .sidebar.active {
-              left: 0;
-          }
+        .sidebar.active {
+            left: 0;
+        }
 
-          .sidebar .nav-links {
-              margin-top: 50px;
-          }
+        .sidebar .nav-links {
+            margin-top: 50px;
+        }
 
-          .sidebar .nav-links li {
-              text-align: center;
-          }
+        .sidebar .nav-links li {
+            text-align: center;
+        }
 
-          .sidebar .nav-links li a {
-              display: block;
-              padding: 20px;
-              color: #000;
-              text-decoration: none;
-          }
+        .sidebar .nav-links li a {
+            display: block;
+            padding: 20px;
+            color: #000;
+            text-decoration: none;
+        }
 
-          .sidebar .nav-links li a:hover {
-              background-color: #f0f0f0;
-          }
+        .sidebar .nav-links li a:hover {
+            background-color: #f0f0f0;
+        }
 
-          .overlay {
-              position: fixed;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.5);
-              z-index: 999;
-              display: none;
-          }
+        .social-media-icons {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
 
-          .overlay.active {
-              display: block;
-          }
+        .social-media-icons a {
+            margin: 0 5px;
+            font-size: 20px;
+            color: #000;
+        }
 
-          .toggle-btn {
-              position: absolute;
-              top: 15px;
-              right: 20px;
-              cursor: pointer;
-              z-index: 1001;
-          }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
 
-          .social-media-icons {
-              position: absolute;
-              bottom: 10px;
-              left: 50%;
-              transform: translateX(-50%);
-          }
+        .overlay.active {
+            display: block;
+        }
 
-          .social-media-icons a {
-              margin: 0 5px;
-              font-size: 20px;
-              color: #000;
-          }
+        .toggle-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            cursor: pointer;
+            z-index: 1001;
+        }
 
-          .image-container {
-              position: relative;
-              width: 100px;
-              height: 100px;
-              overflow: hidden;
-              border-radius: 10px;
-          }
+        .circular-menu {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
 
-          .image-container img {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-          }
+        .toggle-circular-menu {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
 
-          .image-overlay {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              background: rgba(0, 0, 0, 0.5);
-              opacity: 0;
-              transition: opacity 0.3s ease;
-              border-radius: 10px;
-          }
+        .toggle-circular-menu:hover {
+            background-color: #0056b3;
+        }
 
-          .image-container:hover .image-overlay {
-              opacity: 1;
-          }
+        .menu-content {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            right: 50%;
+            transform: translateX(50%);
+            width: auto;
+            max-width: 200px;
+            height: auto;
+            max-height: 200px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: none;
+            overflow: hidden;
+        }
 
-          .image-overlay-content {
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              color: #fff;
-              text-align: center;
-          }
-      </style>
-  </head>
+        .menu-content.active {
+            display: block;
+        }
 
-  <body class="bg-gray-100">
-      <!-- Navbar -->
-      <nav class="bg-white shadow-lg">
-          <div class="container mx-auto px-6 py-3 flex justify-between items-center relative">
-              <div class="text-xl font-semibold text-gray-800">DannTeam</div>
-              <button class="toggle-btn">
-                  <i class="fas fa-bars"></i>
-              </button>
-          </div>
-      </nav>
-      <!-- End Navbar -->
+        .image-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 10px;
+            margin: 0 auto;
+            transition: transform 0.3s;
+        }
 
-      <!-- Sidebar -->
-      <div class="sidebar">
-          <ul class="nav-links">
-              <li><a href="#" class="text-gray-800 hover:text-blue-600">Home</a></li>
-              <li><a href="#" class="text-gray-800 hover:text-blue-600">About</a></li>
-              <li><a href="#" class="text-gray-800 hover:text-blue-600">Contact</a></li>
-              <div class="social-media-icons">
-                  <a href="https://www.facebook.com/dannteam.id" target="_blank"><i class="fab fa-facebook"></i></a>
-                  <a href="https://www.twitter.com/dannofficial" target="_blank"><i class="fab fa-twitter"></i></a>
-                  <a href="https://www.instagram.com/dannalwaysalone" target="_blank"><i class="fab fa-instagram"></i></a>
-              </div>
-          </ul>
-      </div>
-      <!-- End Sidebar -->
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-      <div class="overlay"></div>
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+        }
 
-      <div class="container mx-auto px-6 py-4">
-          <div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-12 lg:grid-cols-3">
-              <h1 class="text-3xl font-bold mb-6">File Uploader</h1>
-              <form id="form" enctype="multipart/form-data">
-                  <div class="col-span-1">
-                      <div class="flex items-center border rounded-md px-4 py-2 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-200">
-                          <i class="fa-solid fa-upload mr-4 text-gray-400"></i>
-                          <label class="text-sm text-gray-700" for="file">Pilih File</label>
-                          <input type="file" id="file" name="file" class="hidden" />
-                      </div>
-                  </div>
-                  <div class="mt-4 flex justify-end">
-                      <button type="submit" class="px-4 py-1 text-base font-semibold text-white bg-blue-600 rounded-md border-blue-600 hover:bg-blue-700 focus:outline-none focus:border focus:border-blue-700 focus:ring focus:ring-blue-200">Upload</button>
-                  </div>
-              </form>
-          </div>
+        .image-container:hover .image-overlay {
+            opacity: 1;
+        }
 
-          <!-- Image and Link -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-              <div class="image-container">
-                  <a href="/posting/ahah" target="_blank">
-                      <img src="https://pps.whatsapp.net/v/t61.24694-24/427276266_814850690689386_6590180705939941700_n.jpg?ccb=11-4&oh=01_ASAjudNls9Nn22VwQ0ROOaZyCqPym_4rTvSnRz4DvUT3WQ&oe=661CF1F7&_nc_sid=e6ed6c&_nc_cat=100" />
-                      <div class="image-overlay">
-                          <div class="image-overlay-content">
-                              <span>View</span>
-                          </div>
-                      </div>
-                  </a>
-              </div>
-          </div>
-          <!-- End Image and Link -->
-      </div>
+        .image-overlay-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-align: center;
+        }
 
-      <div class="footer flex justify-center items-center py-4 bg-gray-100 text-gray-600">
-          <div>&copy; 2024 <a href="https://dannteam.com" target="_blank" class="text-blue-600">DannTeam</a>. All Rights Reserved.</div>
-      </div>
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            grid-gap: 5px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
 
-      <script>
-          const form = document.getElementById('form');
-          const toggleBtn = document.querySelector('.toggle-btn');
-          const sidebar = document.querySelector('.sidebar');
-          const overlay = document.querySelector('.overlay');
+        .color-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
 
-          toggleBtn.addEventListener('click', () => {
-              sidebar.classList.toggle('active');
-              overlay.classList.toggle('active');
-          });
+        .color-box:hover {
+            opacity: 0.8;
+        }
 
-          overlay.addEventListener('click', () => {
-              sidebar.classList.remove('active');
-              overlay.classList.remove('active');
-          });
+        .bg-custom {
+            background-color: #007bff !important;
+            color: #fff !important;
+        }
 
-          form.addEventListener('submit', (e) => {
-              e.preventDefault();
+        @media (min-width: 768px) {
+            .container {
+                max-width: 960px;
+            }
 
-              const formData = new FormData(form);
-              const submitButton = document.querySelector('button[type="submit"]');
-              const loading = document.createElement('i');
-              loading.classList.add('fa-solid', 'fa-spin', 'fa-spinner');
+            .image-container {
+                width: 100%;
+            }
+        }
 
-              submitButton.disabled = true;
-              submitButton.appendChild(loading);
-              submitButton.classList.remove('border-blue-600', 'hover:bg-blue-700');
-              submitButton.classList.add('border-gray-500', 'hover:bg-gray-600');
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
 
-              fetch('/api/upload', {
-                      method: 'POST',
-                      body: formData
-                  })
-                  .then((res) => res.json())
-                  .then((data) => {
-                      submitButton.disabled = false;
-                      loading.remove();
-                      submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
-                      submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
+            to {
+                opacity: 1;
+            }
+        }
 
-                      if (data.success) {
-                          Swal.fire({
-                              icon: 'success',
-                              title: 'Upload Berhasil!',
-                              text: `File berhasil diupload!`,
-                              footer: `<a href="${data.url}" target="_blank">Click here to view</a>`
-                          }).then(() => {
-                              document.querySelector('input[type="file"]').value = '';
-                          });
-                      } else {
-                          Swal.fire({
-                              icon: 'error',
-                              title: 'Upload Failed!',
-                              text: data.error
-                          });
-                      }
-                  })
-                  .catch((error) => {
-                      submitButton.disabled = false;
-                      loading.remove();
-                      submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
-                      submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
-                      Swal.fire({
-                          icon: 'error',
-                          title: 'Upload Failed!',
-                          text: error.message
-                      });
-                  });
-          });
-      </script>
-  </body>
+        .animate__animated {
+            animation-duration: 1s;
+            animation-fill-mode: both;
+        }
 
-  </html>
+        .animate__fadeIn {
+            animation-name: fadeIn;
+        }
+
+        @keyframes rainbow {
+            0% { background-color: #FF0000; }
+            16.666% { background-color: #FFA500; }
+            33.333% { background-color: #FFFF00; }
+            50% { background-color: #008000; }
+            66.666% { background-color: #0000FF; }
+            83.333% { background-color: #4B0082; }
+            100% { background-color: #FF0000; }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-lg">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center relative">
+            <div class="text-xl font-semibold text-gray-800">DannTeam</div>
+            <button class="toggle-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+    <!-- End Navbar -->
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <ul class="nav-links">
+            <li><a href="#" class="text-gray-800 hover:text-blue-600">Home</a></li>
+            <li><a href="#" class="text-gray-800 hover:text-blue-600">About</a></li>
+            <li><a href="#" class="text-gray-800 hover:text-blue-600">Contact</a></li>
+            <div class="social-media-icons">
+                <a href="https://www.facebook.com/dannteam.id" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="https://www.twitter.com/dannofficial" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.instagram.com/dannalwaysalone" target="_blank"><i class="fab fa-instagram"></i></a>
+            </div>
+        </ul>
+    </div>
+    <!-- End Sidebar -->
+
+    <div class="overlay"></div>
+
+    <div class="container mx-auto px-6 py-4">
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-12 lg:grid-cols-3">
+            <h1 class="text-3xl font-bold mb-6 md:col-span-3 md:text-center">File Uploader</h1>
+            <form id="form" enctype="multipart/form-data"
+                class="md:col-span-3 animate__animated animate__fadeIn">
+              <div class="col-span-1">
+                  <div class="flex items-center border rounded-md px-4 py-2 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 focus:border-blue-400 focus:outline-none focus:ring focus:ring-blue-200 animate__animated animate__fadeIn" style="animation: rainbow 5s infinite">
+                      <i class="fa-solid fa-upload mr-4 text-gray-400"></i>
+                      <label class="text-sm text-gray-700" for="file">Pilih File</label>
+                      <input type="file" id="file" name="file" class="hidden" />
+                   </div>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button type="submit"
+                        class="px-4 py-1 text-base font-semibold text-white bg-blue-600 rounded-md border-blue-600 hover:bg-blue-700 focus:outline-none focus:border focus:border-blue-700 focus:ring focus:ring-blue-200">Upload</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Image and Link -->
+        <h2 class="text-2xl font-bold mb-4 mt-8 text-center">Posting</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div class="col-span-1 bg-gray-200 rounded-lg shadow-md p-4">
+                <div class="image-container animate__animated animate__fadeIn">
+                    <a href="/posts/tutorial-upload-file" target="_blank">
+                        <img
+                            src="https://pps.whatsapp.net/v/t61.24694-24/427276266_814850690689386_6590180705939941700_n.jpg?ccb=11-4&oh=01_ASAjudNls9Nn22VwQ0ROOaZyCqPym_4rTvSnRz4DvUT3WQ&oe=661CF1F7&_nc_sid=e6ed6c&_nc_cat=100" />
+                        <div class="image-overlay">
+                            <div class="image-overlay-content">
+                                <span>View</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <p class="text-gray-400 text-sm mt-2">Tutorial cara bagaimana mengunggah file</p>
+                <p class="text-gray-400 text-sm mt-2">Posted on: <span id="currentDate" class="text-gray-500">Loading...</span>
+                </p>
+                <div class="mt-4">
+                    <i class="fas fa-star text-yellow-500"></i>
+                    <i class="fas fa-star text-yellow-500"></i>
+                    <i class="fas fa-star text-yellow-500"></i>
+                    <i class="fas fa-star text-yellow-500"></i>
+                    <i class="fas fa-star text-yellow-500"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Circular Menu Color -->
+        <div class="circular-menu animate__animated animate__fadeIn">
+            <button class="toggle-circular-menu">
+                <i class="fas fa-palette"></i>
+            </button>
+            <div class="menu-content">
+                <!-- Change to display grid -->
+                <div class="color-grid">
+                    <!-- Change to display grid -->
+                    <div class="color-box"
+                        style="background: linear-gradient(to right, #FF512F, #F09819);"></div>
+                    <div class="color-box"
+                        style="background: linear-gradient(to right, #1CB5E0, #000046);"></div>
+                    <div class="color-box"
+                        style="background: linear-gradient(to right, #7F00FF, #E100FF);"></div>
+                    <div class="color-box"
+                        style="background: #ff0000;"></div>
+                    <div class="color-box"
+                        style="background: #00ff00;"></div>
+                    <div class="color-box"
+                        style="background: #0000ff;"></div>
+                    <div class="color-box"
+                        style="background: #fff;"></div>
+                </div>
+            </div>
+        </div>
+        <!-- End Circular Menu Color -->
+
+        <div class="footer flex justify-center items-center py-4 bg-gray-100 text-gray-600">
+            <div>&copy; 2024 <a href="https://dannteam.com" target="_blank"
+                    class="text-blue-600">DannTeam</a>. All Rights Reserved.</div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form');
+        const toggleBtn = document.querySelector('.toggle-btn');
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.overlay');
+        const toggleCircularMenu = document.querySelector('.toggle-circular-menu');
+        const menuContent = document.querySelector('.menu-content');
+        const navbar = document.querySelector('nav');
+        const navLinks = document.querySelector('.nav-links');
+        const footer = document.querySelector('.footer');
+
+        toggleCircularMenu.addEventListener('click', () => {
+            menuContent.classList.toggle('active');
+        });
+
+        function changeBackgroundColor(color) {
+            document.body.style.background = color;
+            navbar.style.background = color;
+            navLinks.style.background = color;
+            sidebar.style.background = color;
+            footer.style.background = color;
+        }
+
+        const colorBoxes = document.querySelectorAll('.color-box');
+        colorBoxes.forEach(colorBox => {
+            colorBox.addEventListener('click', () => {
+                const backgroundColor = colorBox.style.background;
+                changeBackgroundColor(backgroundColor);
+            });
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            menuContent.classList.remove('active');
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const submitButton = document.querySelector('button[type="submit"]');
+            const loading = document.createElement('i');
+            loading.classList.add('fa-solid', 'fa-spin', 'fa-spinner');
+
+            submitButton.disabled = true;
+            submitButton.appendChild(loading);
+            submitButton.classList.remove('border-blue-600', 'hover:bg-blue-700');
+            submitButton.classList.add('border-gray-500', 'hover:bg-gray-600');
+
+            fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then((res) => res.json())
+                .then((data) => {
+                    submitButton.disabled = false;
+                    loading.remove();
+                    submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
+                    submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Upload Berhasil!',
+                            text: `File berhasil diupload!`,
+                            footer: `<a href="${data.url}" target="_blank">Click here to view</a>`
+                        }).then(() => {
+                            document.querySelector('input[type="file"]').value = '';
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Upload Failed!',
+                            text: data.error
+                        });
+                    }
+                })
+                .catch((error) => {
+                    submitButton.disabled = false;
+                    loading.remove();
+                    submitButton.classList.add('border-blue-600', 'hover:bg-blue-700');
+                    submitButton.classList.remove('border-gray-500', 'hover:bg-gray-600');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Upload Failed!',
+                        text: error.message
+                    });
+                });
+        });
+
+        const currentDate = new Date().toISOString().slice(0, 10);
+
+        document.getElementById('currentDate').innerHTML = currentDate;
+    </script>
+</body>
+
+</html>
